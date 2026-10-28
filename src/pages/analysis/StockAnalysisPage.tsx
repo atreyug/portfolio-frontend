@@ -43,6 +43,7 @@ interface Row {
   exchange: string;
   buyDate: string;
   currentPrice: string;
+  analysisQuestion: string;
   expanded: boolean;
 }
 
@@ -57,6 +58,7 @@ const newRow = (): Row => ({
   exchange: "",
   buyDate: "",
   currentPrice: "",
+  analysisQuestion: "",
   expanded: false,
 });
 
@@ -185,17 +187,18 @@ export function StockAnalysisPage() {
       return;
     }
 
-    // Make one backend request per holding. This ensures each stock receives
-    // its own quote lookup, news context, portfolio calculation, and AI analysis.
     setSubmitting(true);
     setResult(null);
     const fullPayload = buildPayload();
     const holdings = fullPayload.holdings;
+    // Rows filtered the same way buildPayload filters holdings, so indices line up.
+    const activeRows = rows.filter((r) => r.symbol.trim());
 
     try {
       const settled = await Promise.all(
-        holdings.map(async (holding) => {
-          const payload = buildStockAnalyzeRequest(clientId, currency, [holding]);
+        holdings.map(async (holding, index) => {
+          const question = activeRows[index]?.analysisQuestion;
+          const payload = buildStockAnalyzeRequest(clientId, currency, [holding], question);
           try {
             const response = await analyzeStocks(payload);
             session.record("stock", payload, response);
@@ -462,6 +465,16 @@ export function StockAnalysisPage() {
                         ) : (
                           <p className="mt-1 text-[10px] text-slate-400">Optional — enables local P&amp;L preview.</p>
                         )}
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Analysis question</label>
+                        <Input
+                          value={row.analysisQuestion}
+                          placeholder="e.g. How exposed am I to this one stock?"
+                          className="h-9"
+                          onChange={(e) => setRow(row.id, { analysisQuestion: e.target.value })}
+                        />
+                        <p className="mt-1 text-[10px] text-slate-400">Optional — the AI answers this using only this stock's supplied data.</p>
                       </div>
                     </div>
                   )}

@@ -53,6 +53,7 @@ interface Row {
   currentValue: string;
   investmentDate: string;
   xirrPct: string;
+  analysisQuestion: string;
   expanded: boolean;
 }
 
@@ -68,6 +69,7 @@ const newRow = (): Row => ({
   currentValue: "",
   investmentDate: "",
   xirrPct: "",
+  analysisQuestion: "",
   expanded: false,
 });
 
@@ -221,7 +223,7 @@ function HoldingsTab({
       const analysisResults = await Promise.all(
         holdings.map(async (holding, index) => {
           const row = holdingRows[index];
-          const payload = buildMutualFundAnalyzeRequest(clientId, currency, [holding]);
+          const payload = buildMutualFundAnalyzeRequest(clientId, currency, [holding], row.analysisQuestion);
           try {
             const response = await analyzeMutualFunds(payload);
             session.record("mutualFund", payload, response);
@@ -366,6 +368,16 @@ function HoldingsTab({
                         {errors[`${row.id}.${field}`] && <p className="mt-1 text-[11px] text-rose-600">{errors[`${row.id}.${field}`]}</p>}
                       </div>
                     ))}
+                    <div className="sm:col-span-3 lg:col-span-4">
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Analysis question</label>
+                      <Input
+                        value={row.analysisQuestion}
+                        placeholder="e.g. Is this scheme's NAV live or stale?"
+                        className="h-9"
+                        onChange={(e) => setRow(row.id, { analysisQuestion: e.target.value })}
+                      />
+                      <p className="mt-1 text-[10px] text-slate-400">Optional — the AI answers this using only this scheme's supplied data.</p>
+                    </div>
                   </div>
                 )}
               </div>

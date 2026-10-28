@@ -80,29 +80,35 @@ const hasRequiredStock = (h: Partial<StockHoldingInput>): h is StockHoldingInput
 const hasRequiredMF = (h: Partial<MutualFundHoldingInput>): h is MutualFundHoldingInput =>
   !!h.client_id && !!h.scheme_name && h.units !== undefined;
 
-/** Build the exact `{ client_id, currency?, holdings }` stock analysis body. */
+/** Build the exact `{ client_id, currency?, holdings, analysis_question? }` stock analysis body. */
 export function buildStockAnalyzeRequest(
   clientId: string,
   currency: CurrencyCode | undefined,
   holdings: StockHoldingInput[],
+  analysisQuestion?: string,
 ): StockAnalyzeRequest {
   const trimmedClient = clientId.trim();
   const list = holdings.map((h) => normalizeStockHolding(h, trimmedClient)).filter(hasRequiredStock);
   const request: StockAnalyzeRequest = { client_id: trimmedClient, holdings: list };
   if (currency) request.currency = currency;
+  const q = analysisQuestion?.trim();
+  if (q) request.analysis_question = q;
   return request;
 }
 
-/** Build the exact `{ client_id, currency?, holdings }` mutual-fund analysis body. */
+/** Build the exact `{ client_id, currency?, holdings, analysis_question? }` mutual-fund analysis body. */
 export function buildMutualFundAnalyzeRequest(
   clientId: string,
   currency: CurrencyCode | undefined,
   holdings: MutualFundHoldingInput[],
+  analysisQuestion?: string,
 ): MutualFundAnalyzeRequest {
   const trimmedClient = clientId.trim();
   const list = holdings.map((h) => normalizeMFHolding(h, trimmedClient)).filter(hasRequiredMF);
   const request: MutualFundAnalyzeRequest = { client_id: trimmedClient, holdings: list };
   if (currency) request.currency = currency;
+  const q = analysisQuestion?.trim();
+  if (q) request.analysis_question = q;
   return request;
 }
 
@@ -115,6 +121,7 @@ export function buildProjectionRequest(
   values: Record<string, string>,
   clientId?: string,
   currency?: CurrencyCode,
+  analysisQuestion?: string,
 ): MutualFundPortfolioRequest {
   const request: MutualFundPortfolioRequest = { projection_type: type };
   if (clientId?.trim()) request.client_id = clientId.trim();
@@ -127,6 +134,8 @@ export function buildProjectionRequest(
     const n = parseNum(values[key] ?? "");
     if (n !== undefined) request[key] = n;
   }
+  const q = analysisQuestion?.trim();
+  if (q) request.analysis_question = q;
   return request;
 }
 

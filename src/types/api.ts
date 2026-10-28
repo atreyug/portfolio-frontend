@@ -73,6 +73,7 @@ export interface StockAnalyzeRequest {
   client_id: string;
   currency?: string;
   holdings: StockHoldingInput[];
+  analysis_question?: string;
 }
 
 /* --------------------------- Mutual funds -------------------------------- */
@@ -94,6 +95,7 @@ export interface MutualFundAnalyzeRequest {
   client_id: string;
   currency?: string;
   holdings: MutualFundHoldingInput[];
+  analysis_question?: string;
 }
 
 export type ProjectionType =
@@ -102,17 +104,18 @@ export type ProjectionType =
   | "TIME_TO_TARGET"
   | "LUMPSUM_GROWTH";
 
-export interface MutualFundPortfolioRequest {
-  client_id?: string;
-  currency?: string;
-  holdings?: MutualFundHoldingInput[];
-  projection_type: ProjectionType;
-  target_amount?: number;
-  monthly_sip_amount?: number;
-  current_investment?: number;
-  duration_months?: number;
-  expected_return_pct?: number;
-}
+  export interface MutualFundPortfolioRequest {
+    client_id?: string;
+    currency?: string;
+    holdings?: MutualFundHoldingInput[];
+    projection_type: ProjectionType;
+    target_amount?: number;
+    monthly_sip_amount?: number;
+    current_investment?: number;
+    duration_months?: number;
+    expected_return_pct?: number;
+    analysis_question?: string;
+  }
 
 /* ------------------------------ Monitoring ------------------------------- */
 
